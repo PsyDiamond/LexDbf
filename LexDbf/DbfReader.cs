@@ -229,33 +229,33 @@ namespace LexTalionis.LexDbf
             }
             while (Read())
             {
+                var row = dt.Rows.Add();
                 for (var i = 0; i < GetColumns.Count; i++)
                 {
-                    var row = dt.Rows.Add();
                     var str = this[i].ToString().Trim();
-                    if (GetColumns[i].Type == DbfColumnType.Date)
+                    switch (GetColumns[i].Type)
                     {
-                        if (str.Length > 0)
-                        {
-                            var item = str;
-                            var year = int.Parse(item.Substring(0, 4));
-                            var month = int.Parse(item.Substring(4, 2));
-                            var day = int.Parse(item.Substring(6, 2));
-                            row[i] = new DateTime(year, month, day);
-                        }
-                    }
-                    else if (GetColumns[i].Type == DbfColumnType.Number)
-                    {
-                        if (str.Length == 0)
-                            row[i] = 0m;
-                        else
-                        {
-                            row[i] = decimal.Parse(str.Replace('.', ','));
-                        }
-                    }
-                    else
-                    {
-                        row[i] = str;        
+                        case DbfColumnType.Date:
+                            if (str.Length > 0)
+                            {
+                                var item = str;
+                                var year = int.Parse(item.Substring(0, 4));
+                                var month = int.Parse(item.Substring(4, 2));
+                                var day = int.Parse(item.Substring(6, 2));
+                                row[i] = new DateTime(year, month, day);
+                            }
+                            break;
+                        case DbfColumnType.Number:
+                            if (str.Length == 0)
+                                row[i] = 0m;
+                            else
+                            {
+                                row[i] = decimal.Parse(str.Replace('.', ','));
+                            }
+                            break;
+                        default:
+                            row[i] = str;
+                            break;
                     }
                     
                 }
@@ -300,7 +300,7 @@ namespace LexTalionis.LexDbf
             {
                 throw new DbfMappingException(errors.ToString());
             }
-            var list = new List<T>();
+            var list = new List<T>(Header.NumberOfRecords);
 
 #pragma warning disable 612,618
             while(Read())
@@ -365,6 +365,13 @@ namespace LexTalionis.LexDbf
         public byte[] Row()
         {
             return _buffer;
+        }
+        /// <summary>
+        /// Количество запсисей
+        /// </summary>
+        public int Count
+        {
+            get { return Header.NumberOfRecords; }
         }
 #endif
     }
