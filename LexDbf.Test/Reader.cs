@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Data;
+using NUnit.Framework;
 using LexTalionis.LexDbf;
 namespace LexDbf.Test
 {
@@ -61,6 +62,22 @@ namespace LexDbf.Test
 
             }
             Assert.AreEqual(index, 0);
+        }
+        
+        [Test]
+        public void ReadToDataTable()
+        {
+            var dt = new DataTable();
+            int columns;
+            using (var dbf = DbfReader.Open(PathToDbf))
+            {
+                columns = dbf.GetColumns.Count;
+#pragma warning disable 612,618
+                dbf.Fill(dt);
+#pragma warning restore 612,618
+            }
+            Assert.AreEqual(columns, dt.Columns.Count, "Колонок");
+            Assert.AreEqual(Count,dt.Rows.Count, "Строк");
         }
     }
 }
