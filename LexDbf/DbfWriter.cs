@@ -29,9 +29,6 @@ namespace LexTalionis.LexDbf
         /// <exception cref="DbfMappingException">Ошибка маппинга</exception>
         public static void Save<T>(string path, List<T> val)
         {
-            if(val.Count == 0)
-                throw new DbfMappingException("Коллекция пуста");
-
             using (var mem = new MemoryStream())
             {
                 // Тип генерика
@@ -87,7 +84,8 @@ namespace LexTalionis.LexDbf
                             }    
                         }
                         
-                        
+                        if (buffer == null)
+                            throw new DbfMappingException("Используется не определённый тип данных");
 // ReSharper disable AssignNullToNotNullAttribute
 // ReSharper disable PossibleNullReferenceException
                         mem.Write(buffer, 0, buffer.Length);
