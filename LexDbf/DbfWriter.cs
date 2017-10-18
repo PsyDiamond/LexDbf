@@ -56,14 +56,18 @@ namespace LexTalionis.LexDbf
                             buffer = Empty(fieldlength);
                         else
                         {
+                            var attribute = f.GetCustomAttributes(typeof(FieldAttribute), true).FirstOrDefault() as
+                                                            FieldAttribute;
+                            if (attribute == null)
+                               throw new DbfMappingException("Не найден аттрибут [FieldAttribute] у поля " + f.Name);
+
                             if (f.FieldType == typeof(string))
                             {
-                                buffer = dbf.Encoding.GetBytes(item.ToString());
-
+                                buffer = dbf.Encoding.GetBytes(item.ToString().PadRight(attribute.Length));
                             }
-                            else if (f.FieldType == typeof(DateTime?))
+                            else if (attribute.Type == 'D' && f.FieldType == typeof(DateTime?))
                             {
-                                var dt = (DateTime)item;
+                                var dt = (DateTime?)item;
                                 var bytelist = new List<byte>();
                                 if (dt == DateTime.MinValue)
                                 {
@@ -71,9 +75,10 @@ namespace LexTalionis.LexDbf
                                 }
                                 else
                                 {
-                                    bytelist.AddRange(dbf.Encoding.GetBytes(dt.Year.ToString(CultureInfo.InvariantCulture)));
-                                    bytelist.AddRange(dbf.Encoding.GetBytes(dt.Month.ToString("D2")));
-                                    bytelist.AddRange(dbf.Encoding.GetBytes(dt.Day.ToString("D2")));
+                                    var dtval = dt.Value;
+                                    bytelist.AddRange(dbf.Encoding.GetBytes(dtval.Year.ToString(CultureInfo.InvariantCulture)));
+                                    bytelist.AddRange(dbf.Encoding.GetBytes(dtval.Month.ToString("D2")));
+                                    bytelist.AddRange(dbf.Encoding.GetBytes(dtval.Day.ToString("D2")));
 
                                     buffer = bytelist.ToArray();
                                 }

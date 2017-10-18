@@ -50,17 +50,21 @@ namespace LexTalionis.LexDbf
             ReadHeader(dbf);
             return dbf;
         }
-
+       
         private static void ReadHeader(DbfReader dbf)
         {
             dbf.Header = new DbfHeader
                 {
-                    VersionNumber = (Signature) dbf._reader.ReadByte(),
-                    LastUpdate = new DateTime(1900 + dbf._reader.ReadByte(), dbf._reader.ReadByte(), dbf._reader.ReadByte()),
-                    NumberOfRecords = dbf._reader.ReadInt32(),
-                    LengthOfHeader = dbf._reader.ReadInt16(),
-                    LengthOfEachRecord = dbf._reader.ReadInt16()
+                    VersionNumber = (Signature) dbf._reader.ReadByte()
                 };
+            var year = dbf._reader.ReadByte();
+            var month = dbf._reader.ReadByte();
+            var day = dbf._reader.ReadByte();
+            dbf.Header.LastUpdate = new DateTime(1900 + year, month, day);
+            dbf.Header.NumberOfRecords = dbf._reader.ReadInt32();
+            dbf.Header.LengthOfHeader = dbf._reader.ReadInt16();
+            dbf.Header.LengthOfEachRecord = dbf._reader.ReadInt16();
+                //};
             // Резерв
             dbf._reader.ReadBytes(2);
             dbf.Header.Transaction = (Transaction)dbf._reader.ReadByte();
@@ -271,8 +275,8 @@ namespace LexTalionis.LexDbf
         public List<T> GetBody<T>()
         {
             var type = typeof (T);
-            if (_tablename != type.FullName)
-                throw new DbfMappingException("Должен быть класс " + _tablename);
+            if (_tablename != type.Name)
+                throw new DbfMappingException("Должен быть класс " + _tablename + " " + type.Name);
 
             var fields = type.GetFields();
             
@@ -366,6 +370,7 @@ namespace LexTalionis.LexDbf
         {
             return _buffer;
         }
+#endif
         /// <summary>
         /// Количество запсисей
         /// </summary>
@@ -373,6 +378,5 @@ namespace LexTalionis.LexDbf
         {
             get { return Header.NumberOfRecords; }
         }
-#endif
     }
 }
