@@ -16,11 +16,15 @@
         /// <summary>
         /// Дата (YYYYMMDD)
         /// </summary>
-        Date = 'D'
+        Date = 'D',
+        /// <summary>
+        /// ДатаВремя (YYYYMMDDHHMMSS)
+        /// </summary>
+        DateTime = 'T'
         /*Logical = 'L',
         FloatingPoint = 'F',
         Currency = 'Y',
-        DateTime = 'T',
+        
         Integer = 'I',
         Binary = 'B'*/
     }

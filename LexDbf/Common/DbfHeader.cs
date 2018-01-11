@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Dbf;
+using LexTalionis.LexDbf.Enums;
 
 namespace LexTalionis.LexDbf.Common
 {
@@ -58,6 +58,10 @@ namespace LexTalionis.LexDbf.Common
         /// </summary>
         protected internal  List<ColumnInfo> Columns;
 
+        /// <summary>
+        /// Диагностический вывод информации о шапке
+        /// </summary>
+        /// <returns>информационное сообщение</returns>
         public override string ToString()
         {
             var sb = new StringBuilder();

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
-using LexTalionis.Dbf;
 using LexTalionis.LexDbf.Enums;
+using LexTalionis.LexDbf.Exceptions;
 
 namespace LexTalionis.LexDbf.Common
 {
@@ -114,6 +114,10 @@ namespace LexTalionis.LexDbf.Common
                 case DbfColumnType.Character:
                     columntype = typeof(string);
                     stringtype = columntype.ToString();
+                    break;
+                case DbfColumnType.DateTime:
+                    stringtype = "DateTime?";
+                    columntype = typeof(DateTime?);
                     break;
                 default:
                     throw new DbfMappingException("Нет сопоставлеия для типа " + type);

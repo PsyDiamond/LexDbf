@@ -7,7 +7,13 @@ namespace LexTalionis.LexDbf.Common
     /// </summary>
     public class DbfFile
     {
+        /// <summary>
+        /// Шапка
+        /// </summary>
         internal protected DbfHeader Header;
+        /// <summary>
+        /// Кодировка
+        /// </summary>
         internal protected Encoding Encoding = Encoding.Default;
     }
 }

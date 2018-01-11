@@ -4,8 +4,6 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Dbf;
-using LexTalionis.Dbf;
 using LexTalionis.LexDbf.Common;
 using LexTalionis.LexDbf.Enums;
 using LexTalionis.LexDbf.Exceptions;
@@ -147,6 +145,9 @@ namespace LexTalionis.LexDbf
             //Console.WriteLine(dbf.Header);
         }
 
+        /// <summary>
+        /// Завершить работу
+        /// </summary>
         public void Dispose()
         {
             _reader.Close();
@@ -317,6 +318,8 @@ namespace LexTalionis.LexDbf
                     object value;
                     if (column.Type == DbfColumnType.Date)
                         value = GetDate(_buffer, column);
+                    else if (column.Type == DbfColumnType.DateTime)
+                        value = GetDateTime(_buffer, column);
                     else
                     {
                         var str = Encoding.GetString(_buffer,
@@ -329,21 +332,43 @@ namespace LexTalionis.LexDbf
                             }
                             else
                             {
-                                value = decimal.Parse(str.Replace('.', ','));    
+                                value = decimal.Parse(str.Replace('.', ','));
                             }
-                            
+
                         }
                         else
                         {
                             value = str;
                         }
-                            
+
                     }
                     type.GetField(column.Name).SetValue(box, value);
                 }
                 list.Add((T)box);
             }
             return list;
+        }
+
+        private object GetDateTime(byte[] buffer, ColumnInfo column)
+        {
+            var str = Encoding.GetString(buffer, column.Offset, 4);
+            if (str.Trim().Length == 0)
+                return null;
+
+            var year = int.Parse(str);
+            if (year < 2000)
+                year += 2000;
+            var month = int.Parse(Encoding.GetString(buffer,
+                                                     column.Offset + 4, 2));
+            var day = int.Parse(Encoding.GetString(buffer,
+                                                   column.Offset + 6, 2));
+            var hour = int.Parse(Encoding.GetString(buffer,
+                                                   column.Offset + 8, 2));
+            var minute = int.Parse(Encoding.GetString(buffer,
+                                                   column.Offset + 10, 2));
+            var second = int.Parse(Encoding.GetString(buffer,
+                                                   column.Offset + 12, 2));
+            return new DateTime(year, month, day, hour, minute, second);
         }
 
         private DateTime? GetDate(byte[] buffer, ColumnInfo column)

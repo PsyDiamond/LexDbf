@@ -4,9 +4,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using LexTalionis.Dbf;
 using LexTalionis.LexDbf.Common;
 using LexTalionis.LexDbf.Enums;
+using LexTalionis.LexDbf.Exceptions;
 
 namespace LexTalionis.LexDbf
 {
@@ -83,10 +83,31 @@ namespace LexTalionis.LexDbf
                                     buffer = bytelist.ToArray();
                                 }
                             }
-                            else if (f.FieldType == typeof(decimal?))
+                            else if (attribute.Type == 'T' && f.FieldType == typeof(DateTime?))
                             {
-                                buffer = dbf.Encoding.GetBytes(item.ToString().Replace(',','.').PadRight(fieldlength));
-                            }    
+                                var dt = (DateTime?)item;
+                                var bytelist = new List<byte>();
+                                if (dt == DateTime.MinValue)
+                                {
+                                    buffer = Empty(fieldlength);
+                                }
+                                else
+                                {
+                                    var dtval = dt.Value;
+                                    bytelist.AddRange(dbf.Encoding.GetBytes(dtval.Year.ToString(CultureInfo.InvariantCulture)));
+                                    bytelist.AddRange(dbf.Encoding.GetBytes(dtval.Month.ToString("D2")));
+                                    bytelist.AddRange(dbf.Encoding.GetBytes(dtval.Day.ToString("D2")));
+                                    bytelist.AddRange(dbf.Encoding.GetBytes(dtval.Hour.ToString("D2")));
+                                    bytelist.AddRange(dbf.Encoding.GetBytes(dtval.Minute.ToString("D2")));
+                                    bytelist.AddRange(dbf.Encoding.GetBytes(dtval.Second.ToString("D2")));
+
+                                    buffer = bytelist.ToArray();
+                                }
+                            }
+                            else if (f.FieldType == typeof (decimal?))
+                            {
+                                buffer = dbf.Encoding.GetBytes(item.ToString().Replace(',', '.').PadRight(fieldlength));
+                            }
                         }
                         
                         if (buffer == null)
