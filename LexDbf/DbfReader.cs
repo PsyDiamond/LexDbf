@@ -316,31 +316,47 @@ namespace LexTalionis.LexDbf
                 foreach (var column in Header.Columns)
                 {
                     object value;
-                    if (column.Type == DbfColumnType.Date)
-                        value = GetDate(_buffer, column);
-                    else if (column.Type == DbfColumnType.DateTime)
-                        value = GetDateTime(_buffer, column);
-                    else
+
+                    switch (column.Type)
                     {
-                        var str = Encoding.GetString(_buffer,
-                                                     column.Offset, column.FieldLength);
-                        if (column.Type == DbfColumnType.Number)
-                        {
-                            if (str.Trim().Length == 0)
+                        case DbfColumnType.Date:
+                            value = GetDate(_buffer, column);
+                            break;
+                        case DbfColumnType.DateTime:
+                            value = GetDateTime(_buffer, column);
+                            break;
+                        case DbfColumnType.Logical:
                             {
-                                value = null;
+                                var tmp = Encoding.GetString(_buffer, column.Offset, 1);
+                                if (tmp == "T" || tmp == "t" || tmp == "Y" || tmp == "y" || tmp == "1")
+                                    value = true;
+                                else
+                                    value = false;
                             }
-                            else
+                            break;
+                        default:
                             {
-                                value = decimal.Parse(str.Replace('.', ','));
+                                var str = Encoding.GetString(_buffer,
+                                                             column.Offset, column.FieldLength);
+                                if (column.Type == DbfColumnType.Number)
+                                {
+                                    if (str.Trim().Length == 0)
+                                    {
+                                        value = null;
+                                    }
+                                    else
+                                    {
+                                        value = decimal.Parse(str.Replace('.', ','));
+                                    }
+
+                                }
+                                else
+                                {
+                                    value = str;
+                                }
+
                             }
-
-                        }
-                        else
-                        {
-                            value = str;
-                        }
-
+                            break;
                     }
                     type.GetField(column.Name).SetValue(box, value);
                 }

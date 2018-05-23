@@ -20,9 +20,12 @@
         /// <summary>
         /// ДатаВремя (YYYYMMDDHHMMSS)
         /// </summary>
-        DateTime = 'T'
-        /*Logical = 'L',
-        FloatingPoint = 'F',
+        DateTime = 'T',
+        /// <summary>
+        /// Логический
+        /// </summary>
+        Logical = 'L',
+        /*FloatingPoint = 'F',
         Currency = 'Y',
         
         Integer = 'I',

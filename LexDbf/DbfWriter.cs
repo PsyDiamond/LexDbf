@@ -104,10 +104,12 @@ namespace LexTalionis.LexDbf
                                     buffer = bytelist.ToArray();
                                 }
                             }
-                            else if (f.FieldType == typeof (decimal?))
+                            else if (f.FieldType == typeof(decimal?))
                             {
                                 buffer = dbf.Encoding.GetBytes(item.ToString().Replace(',', '.').PadRight(fieldlength));
                             }
+                            else if (f.FieldType == typeof (bool))
+                                buffer = dbf.Encoding.GetBytes((bool)item ? "T" : "F");
                         }
                         
                         if (buffer == null)
