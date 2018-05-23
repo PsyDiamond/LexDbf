@@ -11,7 +11,6 @@ namespace ClassGenerator
     {
         static void Main(string[] args)
         {
-
             if (args.Length != 2)
                 throw new Exception("Следует запускать в виде: ClassGenerator.exe pathtodbf pathtoclass");
 
@@ -34,26 +33,51 @@ namespace ClassGenerator
         {
             var sb = new StringBuilder();
             var classname = string.Format("{0}DBF", filename);
+
             sb.AppendLine("using System;");
             sb.AppendLine("using LexTalionis.LexDbf.Common;");
+            sb.AppendLine("// ReSharper disable CheckNamespace");
+            sb.AppendLine("// ReSharper disable CSharpWarnings::CS1591");
+            sb.AppendLine("// ReSharper disable InconsistentNaming");
+            
+            sb.AppendLine("/// <summary>");
+            sb.AppendFormat("/// {0}", classname).AppendLine();
+            sb.AppendLine("/// <summary>");
+
             sb.AppendFormat("public class {0}", classname).AppendLine();
+
+            sb.AppendLine("// ReSharper restore InconsistentNaming");
+            sb.AppendLine("// ReSharper restore CSharpWarnings::CS1591");
+            sb.AppendLine("// ReSharper restore CheckNamespace");
+
             sb.AppendLine("{");
 
             foreach (var col in columns)
             {
                 var type = ColumnInfo.GetTypeOfColumnS(col.Type);
+
+                sb.AppendLine("\t/// <summary>");
+                sb.AppendFormat("\t/// {0}", col.Name).AppendLine();
+                sb.AppendLine("\t/// <summary>");
+
                 sb.AppendFormat("\t[Field(Type = '{0}', Length = {1}, DecimalCount = {2})]",
                                 (char)col.Type, col.FieldLength,
                                 col.DecimalCount).AppendLine();
+
+                sb.AppendLine("\t// ReSharper disable CSharpWarnings::CS1591");
+                sb.AppendLine("\t// ReSharper disable InconsistentNaming");
+
                 sb.AppendFormat("\tpublic {0} {1};", type, col.Name).AppendLine();
+
+                sb.AppendLine("\t// ReSharper restore InconsistentNaming");
+                sb.AppendLine("\t// ReSharper restore CSharpWarnings::CS1591");
             }
+
             sb.AppendLine("}");
             var fullpath = pathtoclass + @"\" + classname + ".cs";
             
             using (var file = File.CreateText(fullpath))
-            {
                 file.Write(sb.ToString());
-            }
         }
     }
 }
