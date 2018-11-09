@@ -7,6 +7,7 @@ using System.Text;
 using LexTalionis.LexDbf.Common;
 using LexTalionis.LexDbf.Enums;
 using LexTalionis.LexDbf.Exceptions;
+using LexTalionis.StreamTools;
 
 namespace LexTalionis.LexDbf
 {
@@ -19,6 +20,37 @@ namespace LexTalionis.LexDbf
         private BinaryReader _reader;
         private byte[] _buffer;
         private string _tablename;
+        private static string _tmpfile;
+
+        private DbfReader()
+        {
+        }
+
+        /// <summary>
+        /// Открыть поток 
+        /// </summary>
+        /// <param name="stream">поток</param>
+        /// <param name="encoding">кодировка</param>
+        /// <returns>Читатель DBF</returns>
+        private static DbfReader Open(Stream stream, Encoding encoding)
+        {
+            _tmpfile = Path.GetTempFileName();
+            using (var file = File.Create(_tmpfile))
+            {
+                stream.CopyTo(file);
+            }
+            return Open(_tmpfile, encoding);
+        }
+
+        /// <summary>
+        /// Открыть поток 
+        /// </summary>
+        /// <param name="stream">поток</param>
+        /// <returns>Читатель DBF</returns>
+        public static DbfReader Open(Stream stream)
+        {
+            return Open(stream, null);
+        }
         /// <summary>
         /// Открыть файл 
         /// </summary>
@@ -35,7 +67,7 @@ namespace LexTalionis.LexDbf
         /// <param name="file">путь к файлу</param>
         /// <param name="encoding">кодировка</param>
         /// <returns>Читатель DBF</returns>
-        public static DbfReader Open(string file, Encoding encoding)
+        private static DbfReader Open(string file, Encoding encoding)
         {
             var dbf = new DbfReader {Encoding = encoding ?? Encoding.Default, _tablename = Path.GetFileNameWithoutExtension(file)+"DBF"};
             using (var f = File.OpenRead(file))
@@ -48,7 +80,7 @@ namespace LexTalionis.LexDbf
             ReadHeader(dbf);
             return dbf;
         }
-       
+        
         private static void ReadHeader(DbfReader dbf)
         {
             dbf.Header = new DbfHeader
@@ -108,7 +140,9 @@ namespace LexTalionis.LexDbf
             {
                 var item = new ColumnInfo();
                 var name = dbf.Encoding.GetString(dbf._reader.ReadBytes(11)).TrimEnd(' ', (char) 0x0);
+                
                 var type = dbf._reader.ReadChar();
+                
                 item.Name = name;
                 
                 if (types.Any(x => x == type))
@@ -151,6 +185,8 @@ namespace LexTalionis.LexDbf
         public void Dispose()
         {
             _reader.Close();
+            if (_tmpfile != null)
+                File.Delete(_tmpfile);
         }
 
         /// <summary>
@@ -172,6 +208,8 @@ namespace LexTalionis.LexDbf
         {
             _buffer = _reader.ReadBytes(Header.LengthOfEachRecord);
             //Console.WriteLine("Original position " + _reader.BaseStream.Position);
+            if (_buffer.Count() == 0)
+                return false;
             return _buffer[0] != 0x1A;
         }
 
@@ -181,7 +219,7 @@ namespace LexTalionis.LexDbf
         /// <param name="index">порядковый №</param>
         /// <exception cref="DbfIndexException">Если не верный индекс</exception>
         [Obsolete("Следует использвать GetBody<T>()")]
-        public object this[int index] {
+        private object this[int index] {
             get
             {
                 if (index <= Header.Columns.Count)
@@ -266,7 +304,17 @@ namespace LexTalionis.LexDbf
                 }
             }    
         }
-
+        /// <summary>
+        /// Получить содержимое
+        /// </summary>
+        /// <typeparam name="T">Хранилище</typeparam>
+        /// <param name="skipCheking">пропустить необязательные проверки</param>
+        /// <returns>Набор элементов</returns>
+        /// <exception cref="DbfMappingException">Ошибка маппинга</exception>
+        public List<T> GetBody<T>(bool skipCheking)
+        {
+            return GetBodyCore<T>(skipCheking);
+        }
         /// <summary>
         /// Получить содержимое
         /// </summary>
@@ -275,9 +323,18 @@ namespace LexTalionis.LexDbf
         /// <exception cref="DbfMappingException">Ошибка маппинга</exception>
         public List<T> GetBody<T>()
         {
+            return GetBodyCore<T>(false);
+        }
+        
+        private List<T> GetBodyCore<T>(bool skipCheking)
+        {
             var type = typeof (T);
-            if (_tablename != type.Name)
-                throw new DbfMappingException("Должен быть класс " + _tablename + " " + type.Name);
+            if (!skipCheking)
+            {
+                if (_tablename != type.Name)
+                    throw new DbfMappingException("Должен быть класс " + _tablename + " " + type.Name);    
+            }
+            
 
             var fields = type.GetFields();
             
@@ -337,7 +394,7 @@ namespace LexTalionis.LexDbf
                         default:
                             {
                                 var str = Encoding.GetString(_buffer,
-                                                             column.Offset, column.FieldLength);
+                                                             column.Offset, column.FieldLength).Trim();
                                 if (column.Type == DbfColumnType.Number)
                                 {
                                     if (str.Trim().Length == 0)
