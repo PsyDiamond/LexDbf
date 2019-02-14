@@ -13,7 +13,8 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -62,7 +63,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\StreamTools\StreamTools.csproj">
       <Project>{71BF153D-65A7-4A31-8125-3CBE3DD10B73}</Project>
-      <Name>StreamTools %28Главный\StreamTools\StreamTools%29</Name>
+      <Name>StreamTools %28StreamTools\StreamTools%29</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
