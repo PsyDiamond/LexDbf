@@ -109,6 +109,7 @@ namespace LexTalionis.LexDbf
             switch (dbf.Header.LanguageDriver)
             {
                 case CodePage.СodePage1251:
+                case CodePage.Unknow:
                     dbf.Encoding = Encoding.GetEncoding(1251); 
                     break;
                 case CodePage.СodePage866:
