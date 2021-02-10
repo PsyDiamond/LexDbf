@@ -7,7 +7,7 @@ namespace LexDbf.Test
     /// Тесты читателя
     /// </summary>
     [TestFixture]
-    class Reader
+    class ReaderIntegrationTest
     {
         private const string PathToDbf = @"..\..\Dbf\KLF_NAMES.dbf";
         private const int Count = 606;

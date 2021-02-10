@@ -10,10 +10,10 @@ namespace LexTalionis.LexDbf.Common
         /// <summary>
         /// Шапка
         /// </summary>
-        protected DbfHeader Header;
+        internal DbfHeader Header;
         /// <summary>
         /// Кодировка
         /// </summary>
-        protected Encoding Encoding = Encoding.Default;
+        internal Encoding Encoding = Encoding.Default;
     }
 }
