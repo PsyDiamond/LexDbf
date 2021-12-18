@@ -47,10 +47,8 @@ namespace LexTalionis.LexDbf
                     foreach (var f in fields)
                     {
                         var item = f.GetValue(v);
-                        // ReSharper disable PossibleNullReferenceException
-                        var content = dbf.Header.Columns.FirstOrDefault(x => x.Name == f.Name);
+                        var content = dbf.Header.Columns.First(x => x.Name == f.Name);
                         var fieldlength = content.FieldLength;           
-                        // ReSharper restore PossibleNullReferenceException
                         byte[] buffer = null;
                         if (item == null)
                             buffer = Empty(fieldlength);
